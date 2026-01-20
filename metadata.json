@@ -1,0 +1,7 @@
+{
+  "name": "GourmetVision",
+  "description": "An AI-powered menu visualizer that translates and generates realistic food photography for restaurant menus.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
