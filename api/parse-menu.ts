@@ -1,5 +1,9 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { config } from "dotenv";
+
+// Load .env.local for local development
+config({ path: ".env.local" });
 
 const MENU_PARSING_MODEL = "gemini-3-flash-preview";
 
@@ -8,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     return res.status(500).json({ error: "API key not configured" });
   }

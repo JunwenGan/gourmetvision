@@ -2,7 +2,6 @@ import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { MenuAnalysisResponse } from "../types";
 
 const MENU_PARSING_MODEL = "gemini-3-flash-preview";
-const IMAGE_GEN_MODEL = "gemini-2.5-flash-image";
 
 // Check if we're in production (Vercel) or development
 const isProduction = import.meta.env.PROD;
@@ -98,54 +97,17 @@ export const generateDishPhoto = async (
   dishName: string,
   description: string
 ): Promise<string> => {
-  // In production, use API route
-  if (isProduction) {
-    const response = await fetch("/api/generate-image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ dishName, description }),
-    });
+  const response = await fetch("/api/generate-image", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ dishName, description }),
+  });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to generate image");
-    }
-
-    const data = await response.json();
-    return data.imageUrl;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to generate image");
   }
 
-  // In development, call Gemini directly
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error("VITE_GEMINI_API_KEY not set in .env.local");
-  }
-
-  const ai = new GoogleGenAI({ apiKey });
-
-  const prompt = `Realistic, appetizing professional photography of ${dishName}. Visual description: ${description}. Bright and modern aesthetic, soft natural daylight, professional food styling, high resolution, 8k.`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: IMAGE_GEN_MODEL,
-      contents: {
-        parts: [{ text: prompt }],
-      },
-      config: {
-        imageConfig: {
-          aspectRatio: "4:3",
-        },
-      },
-    });
-
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
-      }
-    }
-    throw new Error("No image data found in response");
-  } catch (error) {
-    console.error("Error generating image:", error);
-    throw error;
-  }
+  const data = await response.json();
+  return data.imageUrl;
 };
